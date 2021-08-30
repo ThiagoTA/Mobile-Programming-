@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
      View, 
      Text, 
      StyleSheet,
      TextInput,
      Platform,
-     TouchableOpacity,
-     ScrollView
+     FlatList
     } from 'react-native';
+    
+import { Button } from '../components/Button';
+import { SkillCard } from '../components/SkillCard';
 
 interface ISkillData {
   id: string;
@@ -17,52 +19,68 @@ interface ISkillData {
 export function Home() {
   const [newSkill, setNewSkill] = useState('')
   const [mySkills, setMySkills] = useState<ISkillData[]>([])
+  const [greeting, setGreeting] = useState('')
 
   function handleAddNewSkill() {
     const data = {
       id: String(new Date().getTime()),
       name: newSkill
     }
-
     setMySkills([...mySkills, data])
     setNewSkill('')
-
   }
+
+  function handleRemoveSkill(id: string) {
+    setMySkills(mySkills => mySkills.filter(skill => skill.id !== id))
+  }
+
+  useEffect(() => {
+    const currentHour = new Date().getHours()
+    if (currentHour < 12) {
+      setGreeting('Bom dia!')
+    } else if (currentHour >= 12 && currentHour < 18) {
+      setGreeting('Boa tarde!')
+    } else {
+      setGreeting('Boa noite!')
+    }
+  }, [mySkills])
 
   return (
     <>
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo, Thiago Teixeira</Text>
 
+      <Text style={styles.greetings}>
+        {greeting}
+      </Text>
+
       <TextInput 
       style={styles.input}
       placeholder="New Skill"
-      placeholderTextColor='#555555'
+      placeholderTextColor='#e0c6c6'
       value={newSkill}
       onChangeText={value => setNewSkill(value)}
-        />
+      />
 
-      <TouchableOpacity 
-          style={styles.button}
-          activeOpacity={0.5}
-          onPress={handleAddNewSkill}>
-        <Text style={styles.buttonText}>Add</Text>
-      </TouchableOpacity>  
-
+      <Button 
+      title = "Add" 
+      onPress={handleAddNewSkill}  
+      />
+      
       <Text style={[styles.title, { marginVertical: 20 }]}>
         My Skills
       </Text>
       
-      <ScrollView>
-      {
-        mySkills.map(skill => (
-          <TouchableOpacity key={skill.id} style={styles.buttonSkill}>
-          <Text style={styles.textSkill}>{skill.name}</Text>
-        </TouchableOpacity>
-        ))
-      }
-      </ScrollView>
-
+      <FlatList showsVerticalScrollIndicator={true}
+        data={mySkills}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <SkillCard  
+            skill={item.name}
+            onPress={() => handleRemoveSkill(item.id)}
+          />
+        )}
+      />
     </View>
     </>
   );
@@ -88,29 +106,8 @@ const styles = StyleSheet.create({
         marginTop: 30,
         borderRadius: 7,
     },
-    button: {
-        backgroundColor: '#a370f7',
-        padding: 15,
-        borderRadius: 7,
-        alignItems: 'center',
-        marginTop: 10
-    },
-    buttonText: {
-      color: '#FFF',
-      fontSize: 18,
-      fontWeight: 'bold'
-    },
-    buttonSkill: {
-      backgroundColor: '#1f1e25',
-      padding: 15,
-      borderRadius: 20,
-      alignItems: 'center',
-      marginBottom: 15
-    },
-    textSkill: {
-      color: '#FFF',
-      fontSize: 22,
-      fontWeight: 'bold'
+    greetings: {
+      color: '#FFF'
     }
 })
 
