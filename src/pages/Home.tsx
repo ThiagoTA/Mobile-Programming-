@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-     View, 
-     Text, 
-     StyleSheet,
-     TextInput,
-     Platform,
-     FlatList
-    } from 'react-native';
+import { FlatList } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
     
-import { Button } from '../components/Button';
-import { SkillCard } from '../components/SkillCard';
+import { Container, Title, Greetings, Input } from './styles';
+import { Button } from '../components/button/Button';
+import { SkillCard } from '../components/skillCards/SkillCard';
 
 interface ISkillData {
   id: string;
@@ -43,19 +38,40 @@ export function Home() {
     } else {
       setGreeting('Boa noite!')
     }
+  }, [])
+  // Assincrono = grava e continua
+  // Sincrono = grava e espera
+
+  useEffect(() => {
+    // async function loadData() {
+    //   const storageSkills = await AsyncStorage.getItem('@myskills:skills')
+    //   if (storageSkills) {
+    //     setMySkills(JSON.parse(storageSkills))
+    //   }
+    // }
+    // loadData()
+    async function removeAll() {
+      await AsyncStorage.removeItem('@myskills:skills')
+    }
+  }, [])
+
+  useEffect(() => {
+    async function saveData() {
+      await AsyncStorage.setItem('@myskills:skills', JSON.stringify(mySkills))
+    }
+    saveData()
   }, [mySkills])
 
   return (
     <>
-    <View style={styles.container}>
-      <Text style={styles.title}>Bem Vindo, Thiago Teixeira</Text>
+    <Container>
+      <Title>Bem Vindo, Thiago Teixeira</Title>
 
-      <Text style={styles.greetings}>
+      <Greetings>
         {greeting}
-      </Text>
+      </Greetings>
 
-      <TextInput 
-      style={styles.input}
+      <Input 
       placeholder="New Skill"
       placeholderTextColor='#e0c6c6'
       value={newSkill}
@@ -67,9 +83,9 @@ export function Home() {
       onPress={handleAddNewSkill}  
       />
       
-      <Text style={[styles.title, { marginVertical: 20 }]}>
+      <Title style={{ marginVertical: 20 }}>
         My Skills
-      </Text>
+      </Title>
       
       <FlatList showsVerticalScrollIndicator={true}
         data={mySkills}
@@ -81,34 +97,10 @@ export function Home() {
           />
         )}
       />
-    </View>
+    </Container>
     </>
   );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121015',
-        paddingHorizontal: 30,
-        paddingVertical: 70
-    },
-    title: {
-        color: '#FFF',
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    input: {
-        backgroundColor: '#282730',
-        color: '#FFF',
-        fontSize: 18,
-        padding: Platform.OS === 'ios' ? 15 : 9,
-        marginTop: 30,
-        borderRadius: 7,
-    },
-    greetings: {
-      color: '#FFF'
-    }
-})
 
 
